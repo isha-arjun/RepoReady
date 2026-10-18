@@ -1,0 +1,582 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b1020">
+<title>RepoReady — Is your repository ready?</title>
+<meta name="description" content="Check your public GitHub repository's first-time-user experience. Get a practical report on documentation, setup instructions, licensing, and project essentials.">
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #0b1020;
+  --panel: #121a2d;
+  --panel2: #182239;
+  --text: #edf2ff;
+  --muted: #9caac5;
+  --line: #293651;
+  --accent: #9b8cff;
+  --green: #5ee0ad;
+  --yellow: #ffcf70;
+  --red: #ff8294;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background:
+    radial-gradient(ellipse at 50% -20%, #30285e 0%, transparent 48%),
+    var(--bg);
+  color: var(--text);
+  font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+}
+a { color: #b8adff; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+.container { width: min(1040px, 92%); margin: auto; }
+header { padding: 22px 0; border-bottom: 1px solid #ffffff12; }
+.nav { display:flex; align-items:center; justify-content:space-between; gap:16px; }
+.brand { font-weight:800; font-size:20px; letter-spacing:-.7px; }
+.brand span { color:var(--accent); }
+.nav-note { color:var(--muted); font-size:13px; }
+.hero { text-align:center; padding:76px 0 42px; }
+.eyebrow {
+  display:inline-block; color:#c5bcff; background:#9380ff19;
+  border:1px solid #9380ff45; border-radius:999px;
+  padding:5px 12px; font-size:12px; font-weight:700;
+  letter-spacing:1px; text-transform:uppercase;
+}
+h1 { font-size:clamp(38px, 7vw, 66px); line-height:1.06;
+  letter-spacing:-2.7px; margin:22px 0 18px; }
+.gradient { background:linear-gradient(100deg,#c5bbff,#79d9ff);
+  -webkit-background-clip:text; background-clip:text; color:transparent; }
+.subtitle { max-width:650px; margin:0 auto; color:var(--muted); font-size:17px; }
+.search {
+  display:flex; gap:10px; max-width:740px; margin:30px auto 12px;
+  padding:8px; background:var(--panel); border:1px solid var(--line);
+  border-radius:16px; box-shadow:0 18px 70px #0003;
+}
+.search input {
+  flex:1; min-width:0; padding:12px; border:0; outline:none;
+  color:var(--text); background:transparent;
+}
+.search input::placeholder { color:#71809e; }
+.primary {
+  border:0; border-radius:11px; padding:12px 20px;
+  background:var(--accent); color:#100d24; font-weight:800;
+}
+.primary:hover { filter:brightness(1.1); }
+.primary:disabled { opacity:.6; cursor:wait; }
+.small-note { color:var(--muted); font-size:12px; }
+.examples { display:flex; justify-content:center; flex-wrap:wrap;
+  gap:8px; margin-top:16px; }
+.example {
+  border:1px solid var(--line); border-radius:999px;
+  background:#ffffff05; color:#c9d2e8; padding:6px 11px; font-size:12px;
+}
+.example:hover { border-color:var(--accent); }
+main { padding:16px 0 70px; }
+.status { text-align:center; color:var(--muted); margin:14px 0; }
+.error { color:var(--red); }
+.hidden { display:none !important; }
+.repo-card {
+  padding:25px; border:1px solid var(--line); border-radius:20px;
+  background:linear-gradient(145deg,#17223a,#111829);
+  margin:28px 0 18px;
+}
+.repo-top { display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+.repo-name { font-size:24px; font-weight:800; overflow-wrap:anywhere; }
+.repo-desc { color:var(--muted); margin:6px 0 14px; }
+.stats { display:flex; gap:15px; flex-wrap:wrap; color:#c5d0e5; font-size:13px; }
+.pill { border:1px solid var(--line); padding:4px 9px; border-radius:999px; font-size:12px; }
+.results-grid { display:grid; grid-template-columns:300px 1fr; gap:18px; }
+.panel { background:var(--panel); border:1px solid var(--line);
+  border-radius:18px; padding:22px; min-width:0; }
+.score-wrap { text-align:center; padding:15px 0 20px; }
+.score {
+  width:144px; height:144px; border-radius:50%; margin:auto;
+  display:grid; place-content:center;
+  border:9px solid #34405a;
+  background:radial-gradient(circle,#202b45,#121a2d);
+}
+.score strong { font-size:43px; line-height:1.2; }
+.score span { font-size:12px; color:var(--muted); }
+.score-label { font-weight:800; font-size:18px; margin-top:16px; }
+.meter { height:7px; border-radius:99px; background:#2a3550; overflow:hidden; margin-top:18px; }
+.meter div { height:100%; background:linear-gradient(90deg,#8d7aff,#62dfbd); width:0; }
+h2 { font-size:19px; margin:0 0 16px; letter-spacing:-.4px; }
+h3 { font-size:15px; margin:0; }
+.checks { display:grid; gap:10px; }
+.check {
+  display:flex; gap:13px; align-items:flex-start;
+  padding:15px; border:1px solid var(--line); border-radius:13px;
+  background:#ffffff03;
+}
+.check-icon { width:30px; height:30px; border-radius:9px;
+  display:grid; place-items:center; flex-shrink:0; font-weight:900; }
+.pass .check-icon { background:#5ee0ad19; color:var(--green); }
+.warn .check-icon { background:#ffcf7019; color:var(--yellow); }
+.fail .check-icon { background:#ff829419; color:var(--red); }
+.check p { margin:5px 0 0; font-size:13px; color:var(--muted); overflow-wrap:anywhere; }
+.check .tag { margin-left:auto; font-size:11px; color:var(--muted); }
+.recommendations { margin-top:18px; }
+.recommendation {
+  padding:13px 0; border-bottom:1px solid var(--line);
+  color:#dce5f8; font-size:14px;
+}
+.recommendation:last-child { border-bottom:0; }
+.actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; }
+.secondary {
+  border:1px solid var(--line); background:var(--panel2);
+  color:var(--text); padding:10px 14px; border-radius:10px;
+}
+.secondary:hover { border-color:var(--accent); }
+footer { border-top:1px solid #ffffff12; padding:25px 0 35px; color:var(--muted); font-size:12px; }
+footer .container { display:flex; justify-content:space-between; gap:15px; flex-wrap:wrap; }
+@media(max-width:760px) {
+  .hero { padding-top:52px; }
+  .results-grid { grid-template-columns:1fr; }
+  .search { flex-direction:column; }
+  .search input { padding:13px; }
+  .primary { width:100%; }
+  h1 { letter-spacing:-1.8px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="container nav">
+    <div class="brand">◈ Repo<span>Ready</span></div>
+    <div class="nav-note">Open-source first impressions</div>
+  </div>
+</header>
+
+<section class="hero container">
+  <div class="eyebrow">Built for open source</div>
+  <h1>Would a new user<br><span class="gradient">understand your repo?</span></h1>
+  <p class="subtitle">
+    Check your project's first-time-user experience.
+    Find missing essentials, improve your documentation,
+    and make it easier for people to get started.
+  </p>
+  <form class="search" id="searchForm">
+    <input id="repoInput" type="url"
+      placeholder="https://github.com/owner/repository"
+      aria-label="Public GitHub repository URL" required>
+    <button class="primary" id="analyzeBtn" type="submit">Analyze repository ↗</button>
+  </form>
+  <div class="small-note">Public repositories only · No sign-in · No AI API key</div>
+  <div class="examples">
+    <button class="example" data-repo="https://github.com/octocat/Hello-World">Try an example</button>
+    <button class="example" data-repo="https://github.com/expressjs/express">Try a popular project</button>
+  </div>
+</section>
+
+<main class="container">
+  <div id="status" class="status" role="status" aria-live="polite"></div>
+
+  <section id="results" class="hidden" aria-live="polite">
+    <div class="repo-card">
+      <div class="repo-top">
+        <div>
+          <div class="repo-name" id="repoName"></div>
+          <p class="repo-desc" id="repoDesc"></p>
+        </div>
+        <a id="repoLink" href="#" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a>
+      </div>
+      <div class="stats" id="repoStats"></div>
+    </div>
+
+    <div class="results-grid">
+      <aside class="panel">
+        <h2>Readiness overview</h2>
+        <div class="score-wrap">
+          <div class="score" id="scoreCircle">
+            <strong id="scoreNumber">0</strong>
+            <span>out of 100</span>
+          </div>
+          <div class="score-label" id="scoreLabel"></div>
+          <p class="small-note" id="scoreDescription"></p>
+          <div class="meter"><div id="scoreMeter"></div></div>
+        </div>
+        <div class="small-note">
+          This is a documentation and repository-structure heuristic,
+          not a measure of code quality, security, or project success.
+        </div>
+        <div class="actions">
+          <button class="secondary" id="downloadBtn">Download report</button>
+          <button class="secondary" id="shareBtn">Copy report link</button>
+        </div>
+      </aside>
+
+      <section class="panel">
+        <h2>Repository checks</h2>
+        <div class="checks" id="checks"></div>
+        <div class="recommendations">
+          <h2>Recommended next steps</h2>
+          <div id="recommendations"></div>
+        </div>
+      </section>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">
+    <span>RepoReady · An independent open-source helper</span>
+    <span>Read-only analysis of public repository information.</span>
+  </div>
+</footer>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let latestReport = null;
+
+const apiHeaders = {
+  "Accept": "application/vnd.github+json"
+};
+
+async function api(path) {
+  const response = await fetch("https://api.github.com" + path, {
+    headers: apiHeaders
+  });
+
+  if (!response.ok) {
+    if (response.status === 404) throw new Error("Repository or file not found.");
+    if (response.status === 403 || response.status === 429) {
+      throw new Error("GitHub API rate limit reached. Please wait a little and try again.");
+    }
+    throw new Error("GitHub returned an error (" + response.status + "). Try again later.");
+  }
+  return response.json();
+}
+
+function parseRepo(value) {
+  let url;
+  try { url = new URL(value.trim()); }
+  catch { throw new Error("Enter a valid GitHub repository URL."); }
+
+  if (url.hostname.toLowerCase() !== "github.com") {
+    throw new Error("Please use a URL from github.com.");
+  }
+
+  const parts = url.pathname.split("/").filter(Boolean);
+  if (parts.length < 2) {
+    throw new Error("Use a repository URL like github.com/owner/repository.");
+  }
+
+  const owner = parts[0];
+  const repo = parts[1].replace(/\.git$/i, "");
+  if (!/^[a-zA-Z0-9-]+$/.test(owner) ||
+      !/^[a-zA-Z0-9_.-]+$/.test(repo)) {
+    throw new Error("That repository URL doesn't look valid.");
+  }
+  return { owner, repo, fullName: owner + "/" + repo };
+}
+
+function check(title, passed, detail, points, category = "essential") {
+  return {
+    title, passed, detail, points, category,
+    status: passed ? "pass" : "warn"
+  };
+}
+
+async function getFile(owner, repo, filename) {
+  try {
+    const data = await api(
+      "/repos/" + encodeURIComponent(owner) + "/" +
+      encodeURIComponent(repo) + "/contents/" +
+      filename.split("/").map(encodeURIComponent).join("/")
+    );
+    if (Array.isArray(data)) return { exists: true, content: "", data };
+    let content = "";
+    if (data.content && data.encoding === "base64") {
+      try {
+        content = decodeURIComponent(
+          Array.from(atob(data.content.replace(/\s/g, "")))
+            .map(c => "%" + c.charCodeAt(0).toString(16).padStart(2, "0"))
+            .join("")
+        );
+      } catch {
+        try { content = atob(data.content.replace(/\s/g, "")); } catch {}
+      }
+    }
+    return { exists: true, content, data };
+  } catch (e) {
+    if (e.message.includes("rate limit")) throw e;
+    return { exists: false, content: "", data: null };
+  }
+}
+
+async function analyze(value) {
+  const { owner, repo, fullName } = parseRepo(value);
+  $("status").textContent = "Inspecting " + fullName + "…";
+  $("status").className = "status";
+  $("results").classList.add("hidden");
+  $("analyzeBtn").disabled = true;
+  $("analyzeBtn").textContent = "Analyzing…";
+
+  try {
+    const base = "/repos/" + encodeURIComponent(owner) + "/" +
+      encodeURIComponent(repo);
+
+    const repoData = await api(base);
+
+    if (repoData.private) {
+      throw new Error("Only public repositories can be analyzed.");
+    }
+
+    const [rootResult, readmeResult, licenseResult, contributingResult,
+      conductResult, securityResult, workflowsResult, packageResult] =
+      await Promise.all([
+        api(base + "/contents/").catch(e => {
+          if (e.message.includes("rate limit")) throw e;
+          return [];
+        }),
+        getFile(owner, repo, "README.md"),
+        getFile(owner, repo, "LICENSE").then(async result => {
+          if (result.exists) return result;
+          return getFile(owner, repo, "LICENSE.md");
+        }),
+        getFile(owner, repo, "CONTRIBUTING.md"),
+        getFile(owner, repo, "CODE_OF_CONDUCT.md"),
+        getFile(owner, repo, "SECURITY.md"),
+        api(base + "/contents/.github/workflows").catch(e => {
+          if (e.message.includes("rate limit")) throw e;
+          return [];
+        }),
+        getFile(owner, repo, "package.json")
+      ]);
+
+    const rootNames = Array.isArray(rootResult)
+      ? rootResult.map(f => f.name.toLowerCase()) : [];
+    const readme = readmeResult.content || "";
+    const hasReadme = readmeResult.exists;
+    const hasInstall = /\b(installation|install|getting started|setup)\b/i.test(readme);
+    const hasUsage = /\b(usage|quick start|quickstart|how to use|example)\b/i.test(readme);
+    const hasDescription = Boolean(repoData.description && repoData.description.trim());
+    const hasLicense = Boolean(repoData.license || licenseResult.exists);
+    const hasContributing = contributingResult.exists ||
+      rootNames.includes("contributing.md");
+    const hasConduct = conductResult.exists ||
+      rootNames.includes("code_of_conduct.md");
+    const hasSecurity = securityResult.exists ||
+      rootNames.includes("security.md");
+    const hasAutomation = Array.isArray(workflowsResult) &&
+      workflowsResult.some(f => /\.(yml|yaml)$/i.test(f.name));
+    const hasExamples = /\b(example|examples|demo|sample)\b/i.test(readme) ||
+      rootNames.some(n => ["examples", "example", "demo", "demos"].includes(n));
+    const hasLinks = /\[[^\]]+\]\(https?:\/\/[^)]+\)/i.test(readme);
+    const hasHeadings = /^#{1,2}\s+.+/m.test(readme);
+    const hasRepoUrl = Boolean(repoData.html_url);
+
+    const checks = [
+      check("README exists", hasReadme,
+        hasReadme ? "A README is available for first-time visitors."
+          : "Add a README.md explaining what the project does and how to begin.", 20),
+      check("Clear project description", hasDescription,
+        hasDescription ? repoData.description
+          : "Add a short description in your GitHub repository settings.", 10),
+      check("Installation or setup guidance", hasInstall,
+        hasInstall ? "The README appears to include setup guidance."
+          : "Add a clear installation or setup section with prerequisites.", 15),
+      check("Usage instructions", hasUsage,
+        hasUsage ? "The README appears to explain usage or getting started."
+          : "Show the first command, action, or workflow a new user should try.", 15),
+      check("License information", hasLicense,
+        hasLicense ? "A repository license is declared or a license file exists."
+          : "Add a license if you intend to allow others to reuse your code.", 10),
+      check("Examples or demos", hasExamples,
+        hasExamples ? "Examples or demos appear to be referenced."
+          : "Add a small working example, screenshot, or demo link.", 10),
+      check("Contribution guidance", hasContributing,
+        hasContributing ? "Contribution guidance appears to exist."
+          : "If you welcome contributions, explain how people can help.", 5),
+      check("Community standards", hasConduct,
+        hasConduct ? "A code of conduct appears to exist."
+          : "Consider adding a code of conduct for contributors.", 5),
+      check("Security reporting guidance", hasSecurity,
+        hasSecurity ? "A security policy appears to exist."
+          : "Consider explaining how to report security vulnerabilities.", 5),
+      check("Project automation", hasAutomation,
+        hasAutomation ? "GitHub Actions workflow files were found."
+          : "Consider adding automated checks if they suit your project.", 5)
+    ];
+
+    const score = checks.reduce((sum, item) =>
+      sum + (item.passed ? item.points : 0), 0);
+
+    const recommendations = checks
+      .filter(item => !item.passed)
+      .sort((a, b) => b.points - a.points)
+      .map(item => item.title + ": " + item.detail);
+
+    latestReport = {
+      tool: "RepoReady",
+      version: "1.0.0",
+      generatedAt: new Date().toISOString(),
+      repository: {
+        name: fullName,
+        url: repoData.html_url,
+        description: repoData.description || "",
+        stars: repoData.stargazers_count,
+        forks: repoData.forks_count,
+        openIssues: repoData.open_issues_count,
+        language: repoData.language,
+        license: repoData.license ? repoData.license.spdx_id : null,
+        defaultBranch: repoData.default_branch,
+        updatedAt: repoData.updated_at
+      },
+      score,
+      checks,
+      recommendations,
+      limitations: [
+        "Checks are heuristic and inspect repository metadata and selected files.",
+        "The tool does not run code, verify whether installation works, or audit security.",
+        "Missing checks may reflect naming or API limitations rather than a real omission."
+      ]
+    };
+
+    renderReport(latestReport);
+    $("status").textContent = "Analysis complete.";
+  } catch (error) {
+    $("status").textContent = error.message ||
+      "Something went wrong. Please try again.";
+    $("status").className = "status error";
+  } finally {
+    $("analyzeBtn").disabled = false;
+    $("analyzeBtn").textContent = "Analyze repository ↗";
+  }
+}
+
+function renderReport(report) {
+  const r = report.repository;
+  $("repoName").textContent = r.name;
+  $("repoDesc").textContent = r.description || "No repository description has been set.";
+  $("repoLink").href = r.url;
+
+  const stats = [
+    "★ " + r.stars.toLocaleString() + " stars",
+    "⑂ " + r.forks.toLocaleString() + " forks",
+    r.language || "Language not specified",
+    "Branch: " + (r.defaultBranch || "unknown")
+  ];
+  $("repoStats").replaceChildren(...stats.map(value => {
+    const el = document.createElement("span");
+    el.className = "pill";
+    el.textContent = value;
+    return el;
+  }));
+
+  $("scoreNumber").textContent = report.score;
+  $("scoreMeter").style.width = report.score + "%";
+
+  let label, description;
+  if (report.score >= 85) {
+    label = "Strong first impression";
+    description = "Most of the checked essentials are present.";
+  } else if (report.score >= 65) {
+    label = "Good starting point";
+    description = "A few improvements could make onboarding easier.";
+  } else if (report.score >= 40) {
+    label = "Room to improve";
+    description = "Focus on the biggest missing essentials first.";
+  } else {
+    label = "Needs more guidance";
+    description = "Start with a useful README and setup instructions.";
+  }
+  $("scoreLabel").textContent = label;
+  $("scoreDescription").textContent = description;
+
+  $("checks").replaceChildren(...report.checks.map(item => {
+    const card = document.createElement("div");
+    card.className = "check " + (item.passed ? "pass" : "warn");
+
+    const icon = document.createElement("div");
+    icon.className = "check-icon";
+    icon.textContent = item.passed ? "✓" : "!";
+    const body = document.createElement("div");
+    body.style.flex = "1";
+
+    const title = document.createElement("h3");
+    title.textContent = item.title;
+    const detail = document.createElement("p");
+    detail.textContent = item.detail;
+    body.append(title, detail);
+    card.append(icon, body);
+    return card;
+  }));
+
+  const recommendationBox = $("recommendations");
+  recommendationBox.replaceChildren();
+
+  if (!report.recommendations.length) {
+    const message = document.createElement("div");
+    message.className = "recommendation";
+    message.textContent = "All checks passed. Review the README as a new user and test the setup steps yourself.";
+    recommendationBox.append(message);
+  } else {
+    report.recommendations.forEach((recommendation, index) => {
+      const item = document.createElement("div");
+      item.className = "recommendation";
+      item.textContent = (index + 1) + ". " + recommendation;
+      recommendationBox.append(item);
+    });
+  }
+
+  $("results").classList.remove("hidden");
+  $("results").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+$("searchForm").addEventListener("submit", event => {
+  event.preventDefault();
+  analyze($("repoInput").value);
+});
+
+document.querySelectorAll("[data-repo]").forEach(button => {
+  button.addEventListener("click", () => {
+    $("repoInput").value = button.dataset.repo;
+    analyze(button.dataset.repo);
+  });
+});
+
+$("downloadBtn").addEventListener("click", () => {
+  if (!latestReport) return;
+  const blob = new Blob(
+    [JSON.stringify(latestReport, null, 2)],
+    { type: "application/json" }
+  );
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = latestReport.repository.name.replace("/", "-") +
+    "-repoready-report.json";
+  link.click();
+  URL.revokeObjectURL(url);
+});
+
+$("shareBtn").addEventListener("click", async () => {
+  if (!latestReport) return;
+  const shareUrl = new URL(window.location.href);
+  shareUrl.search = "";
+  shareUrl.searchParams.set("repo", latestReport.repository.name);
+  try {
+    await navigator.clipboard.writeText(shareUrl.toString());
+    $("shareBtn").textContent = "Link copied!";
+    setTimeout(() => $("shareBtn").textContent = "Copy report link", 1800);
+  } catch {
+    window.prompt("Copy this link to share the repository analysis:", shareUrl.toString());
+  }
+});
+
+// Restore a repository from a shared URL.
+const params = new URLSearchParams(window.location.search);
+const initialRepo = params.get("repo");
+if (initialRepo) {
+  $("repoInput").value = "https://github.com/" + initialRepo;
+  analyze($("repoInput").value);
+}
+</script>
+</body>
+</html>
